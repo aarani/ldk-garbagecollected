@@ -94,7 +94,6 @@ jobs:
       - name: Build Mac C# Bindings
         run: |
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
-          export CC="clang --target=aarch64-apple-darwin"
           export LDK_TARGET=aarch64-apple-darwin
           export LDK_TARGET_CPU=apple-a14
           ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
