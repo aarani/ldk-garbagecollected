@@ -665,6 +665,9 @@ jobs:
       - name: Install Rust components
         run: |
           rustup component add rust-src
+      - name: Install GNU sed
+        run: |
+          brew install gnu-sed
       - name: Checkout source code
         uses: actions/checkout@v2
         with:
@@ -687,9 +690,11 @@ jobs:
           cargo update -p memchr --precise "2.5.0" --verbose
       - name: Build C bindings and check the sample app builds + links
         run: |
+          export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
           cd ldk-c-bindings
           CC=clang ./genbindings.sh ../rust-lightning true
       - name: Build
         run: |
+          export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           CC=clang LDK_TARGET=aarch64-apple-darwin LDK_TARGET_CPU=apple-a14 ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
