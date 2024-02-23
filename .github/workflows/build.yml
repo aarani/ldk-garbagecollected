@@ -98,3 +98,7 @@ jobs:
           export LDK_TARGET=aarch64-apple-darwin
           export LDK_TARGET_CPU=apple-a14
           ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
+      - uses: actions/upload-artifact@v3
+        with:
+          name: libldkcsharp
+          path: libldkcsharp_release*.so
