@@ -659,13 +659,8 @@ jobs:
 
   osx:
     strategy:
-      matrix:
-        include:
-          - platform: macos-11
-          - platform: macos-12
-          - platform: macos-13
       fail-fast: false
-    runs-on: ${{ matrix.platform }}
+    runs-on: macos-13
     steps:
       - name: Install Rust components
         run: |
@@ -682,7 +677,7 @@ jobs:
           git config --global user.email "ldk-ci@example.com"
           git config --global user.name "LDK CI"
           # Note this is a different endpoint, as we need one non-upstream commit!
-          git clone https://github.com/rghtningdevkit/ust-lightning
+          git clone https://github.com/lightningdevkit/rust-lightning
           cd rust-lightning
           git checkout origin/0.0.121-bindings
           cd ..
@@ -691,87 +686,11 @@ jobs:
           git checkout 0.0.121
           cd lightning-c-bindings
           cargo update -p memchr --precise "2.5.0" --verbose
-      - name: Rebuild C bindings and check the sample app builds + links
+      - name: Build C bindings and check the sample app builds + links
         run: |
           cd ldk-c-bindings
           CC=clang ./genbindings.sh ../rust-lightning true
-      - name: Fetch OpenJDK 18
-        run: |
-          if [ "$(uname -m)" = "arm64" ]; then
-            wget -O openjdk-18.0.1.1_macos-aarch64_bin.tar.gz https://download.java.net/java/GA/jdk18.0.1.1/65ae32619e2f40f3a9af3af1851d6e19/2/GPL/openjdk-18.0.1.1_macos-aarch64_bin.tar.gz
-            if [ "$(shasum -a 256 openjdk-18.0.1.1_macos-aarch64_bin.tar.gz | awk '{ print $1 }')" != "29773ad68063bdad7fbaeb762cd873d3f243e86de380d3ac5335cdb929371fb5" ]; then
-              echo "Bad hash"
-              exit 1
-            fi
-            tar xvvf openjdk-18.0.1.1_macos-aarch64_bin.tar.gz
-          else
-            wget -O openjdk-18.0.1.1_macos-x64_bin.tar.gz https://download.java.net/java/GA/jdk18.0.1.1/65ae32619e2f40f3a9af3af1851d6e19/2/GPL/openjdk-18.0.1.1_macos-x64_bin.tar.gz
-            if [ "$(shasum -a 256 openjdk-18.0.1.1_macos-x64_bin.tar.gz | awk '{ print $1 }')" != "f02d17ec5a387555f8489abc352d973b6c10364409b597046025938e2266d72a" ]; then
-              echo "Bad hash"
-              exit 1
-            fi
-            tar xvvf openjdk-18.0.1.1_macos-x64_bin.tar.gz
-          fi
-      - name: Checkout latest Linux binaries
+      - name: Build
         run: |
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
-          echo "Fetching deterministic binaries for LDK-GC ${LDK_GARBAGECOLLECTED_GIT_OVERRIDE}"
-          # Gitweb only allows snapshots of folders by providing the object hash, which we have to extract:
-          SNAPSHOT_LINK="$(wget -O /dev/stdout "https://git.bitcoin.ninja/index.cgi?p=ldk-java-bins;a=tree;f=${LDK_GARBAGECOLLECTED_GIT_OVERRIDE};hb=refs/heads/main" | grep snapshot | grep -o 'href="[a-zA-Z0-9/?\.=;\-]*"' | sed 's/href="//' | tr -d '"' | grep snapshot)"
-          wget -O bins-snapshot.tgz "https://git.bitcoin.ninja${SNAPSHOT_LINK}"
-          mkdir -p ldk-java-bins/"${LDK_GARBAGECOLLECTED_GIT_OVERRIDE}"
-          cd ldk-java-bins/"${LDK_GARBAGECOLLECTED_GIT_OVERRIDE}"
-          tar xvvf ../../bins-snapshot.tgz
-          mv ldk-java-bins-*/* ./
-          cd ../..
-          mkdir -p src/main/resources/
-          cp "ldk-java-bins/${LDK_GARBAGECOLLECTED_GIT_OVERRIDE}/liblightningjni_Linux-"* src/main/resources/
-      - name: Build Java Release Bindings
-        run: |
-          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
-          export JAVA_HOME=`pwd`/jdk-18.0.1.1.jdk/Contents/Home
-          export PATH=$JAVA_HOME/bin:$PATH
-          ./genbindings.sh ./ldk-c-bindings/ "-I$JAVA_HOME/include/ -I$JAVA_HOME/include/darwin -isysroot$(xcrun --show-sdk-path)" false false
-
-          if [ "${{ matrix.platform }}" = "macos-11" ]; then
-            export CC="clang --target=aarch64-apple-darwin"
-            export LDK_TARGET=aarch64-apple-darwin
-            export LDK_TARGET_CPU=apple-a14
-            ./genbindings.sh ./ldk-c-bindings/ "-I$JAVA_HOME/include/ -I$JAVA_HOME/include/darwin -isysroot$(xcrun --show-sdk-path)" false false
-            cat src/main/resources/liblightningjni_MacOSX-aarch64.nativelib > /dev/null
-
-          fi
-      - name: Fetch Maven 3.8.4
-        run: |
-          # We don't bother using the upstream mirrors as they remove prior
-          # releases aggressively, causing spurious CI failures when we don't
-          # care about the version used.
-          wget -O apache-maven-3.8.4-bin.tar.gz https://bitcoin.ninja/apache-maven-3.8.4-bin.tar.gz
-          if [ "$(shasum -a 256 apache-maven-3.8.4-bin.tar.gz | awk '{ print $1 }')" != "2cdc9c519427bb20fdc25bef5a9063b790e4abd930e7b14b4e9f4863d6f9f13c" ]; then
-            echo "Bad hash"
-            exit 1
-          fi
-          tar xvvf apache-maven-3.8.4-bin.tar.gz
-          export PATH=apache-maven-3.8.4/bin:$PATH
-      - name: Run Java Tests against built jar
-        run: |
-          export JAVA_HOME=`pwd`/jdk-18.0.1.1.jdk/Contents/Home
-          export PATH=$JAVA_HOME/bin:$PATH
-          mvn -DskipTests=true package
-          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
-          JAR_VERSION=${LDK_GARBAGECOLLECTED_GIT_OVERRIDE:1:100}
-          mvn install:install-file -Dfile=target/ldk-java-${JAR_VERSION}.jar -DgroupId=org.lightningdevkit -DartifactId=ldk-java -Dversion=1.0-SNAPSHOT -Dpackaging=jar
-          cd javatester
-          mvn -q -B package
-          java -ea -jar target/ldk-java-tests-1.0-SNAPSHOT-jar-with-dependencies.jar
-      - name: Run Java Tests against release bins
-        run: |
-          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
-          export JAVA_HOME=`pwd`/jdk-18.0.1.1.jdk/Contents/Home
-          export PATH=$JAVA_HOME/bin:$PATH
-          cp "ldk-java-bins/${LDK_GARBAGECOLLECTED_GIT_OVERRIDE}/ldk-java.jar" ./
-          mvn install:install-file -Dfile=ldk-java.jar -DgroupId=org.lightningdevkit -DartifactId=ldk-java -Dversion=1.0-SNAPSHOT -Dpackaging=jar
-          cd javatester
-          mvn clean
-          mvn -q -B package
-          java -ea -jar target/ldk-java-tests-1.0-SNAPSHOT-jar-with-dependencies.jar
+          CC=clang LDK_TARGET=aarch64-apple-darwin LDK_TARGET_CPU=apple-a14 ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
