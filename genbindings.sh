@@ -54,6 +54,13 @@ case "$TARGET_STRING" in
 		LDK_JAR_TARGET=true
 		IS_MAC=true
 		;;
+	"arm64-apple-darwin23.1.0"*)
+		LDK_TARGET_CPU="apple-a14"
+		LDK_TARGET_SUFFIX="_MacOSX-aarch64"
+		CS_PLATFORM_NAME="osx-arm64"
+		LDK_JAR_TARGET=true
+		IS_MAC=true
+		;;
 	"aarch64-apple-darwin"*)
 		LDK_TARGET_CPU="apple-a14"
 		LDK_TARGET_SUFFIX="_MacOSX-aarch64"
