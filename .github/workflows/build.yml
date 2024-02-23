@@ -93,6 +93,8 @@ jobs:
           CC=clang ./genbindings.sh ../rust-lightning true skip-tests
       - name: Build Mac C# Bindings
         run: |
+          PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
+          PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
           ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - uses: actions/upload-artifact@v3
         with:
