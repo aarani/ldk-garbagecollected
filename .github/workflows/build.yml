@@ -660,11 +660,10 @@ jobs:
   osx:
     strategy:
       fail-fast: false
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - name: Install Rust components
         run: |
-          rustup target install aarch64-apple-darwin
           rustup component add rust-src
       - name: Checkout source code
         uses: actions/checkout@v2
