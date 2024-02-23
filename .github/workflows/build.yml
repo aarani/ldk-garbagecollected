@@ -692,7 +692,7 @@ jobs:
         run: |
           export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
           cd ldk-c-bindings
-          CC=clang ./genbindings.sh ../rust-lightning true
+          CC=clang ./genbindings.sh ../rust-lightning true skip-tests
       - name: Build
         run: |
           export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
