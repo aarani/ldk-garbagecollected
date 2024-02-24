@@ -38,6 +38,7 @@ jobs:
           fetch-depth: 0
       - name: Install cbindgen
         run: |
+          . $HOME/.cargo/env
           git config --global safe.directory '*'
           git clone https://github.com/eqrion/cbindgen
           cd cbindgen/
@@ -57,6 +58,9 @@ jobs:
           git clone https://github.com/lightningdevkit/ldk-c-bindings
           cd ldk-c-bindings
           git checkout 0.0.121
+          cd lightning-c-bindings
+          . $HOME/.cargo/env
+          cargo update -p memchr --precise "2.5.0" --verbose
 #      - name: Rebuild C bindings with STD
 #        run: |
 #          cd ldk-c-bindings
@@ -69,6 +73,7 @@ jobs:
           tar xvvf Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz
       - name: Rebuild bindings, and check the sample app builds + links
         run: |
+          . $HOME/.cargo/env
           # rust-src doesn't distribute the rustlib Cargo.lock, but an empty
           # file seems to suffice to make `-Zbuild-std` happy.
           # touch /usr/lib/rustlib/src/rust/Cargo.lock
@@ -80,14 +85,17 @@ jobs:
         run: rm c_sharp/src/org/ldk/enums/*.cs c_sharp/src/org/ldk/impl/*.cs c_sharp/src/org/ldk/structs/*.cs
       - name: Build Windows C# Bindings
         run: |
+          . $HOME/.cargo/env
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           LDK_TARGET=x86_64-pc-windows-gnu ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - name: Build Linux C# Bindings
         run: |
+          . $HOME/.cargo/env
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - name: Build MacOS C# Bindings
         run: |
+          . $HOME/.cargo/env
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           export CC="clang --target=aarch64-apple-darwin"
           export LDK_TARGET=aarch64-apple-darwin
