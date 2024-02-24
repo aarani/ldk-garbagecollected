@@ -19,7 +19,7 @@ jobs:
           wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
           dpkg -i packages-microsoft-prod.deb
           apt-get update && apt-get install -y dotnet-sdk-8.0
-          apt-get install -y gcc-mingw-w64 git which
+          apt-get install -y g++-mingw-w64 gcc-mingw-w64 git which
           apt-get -y install lld git g++ clang llvm curl faketime
       - name: Install rust
         run: |
