@@ -55,16 +55,19 @@ jobs:
         with:
           name: libldkcsharp
           path: libldkcsharp_release*.so
-  c_sharp_mac_arm64:
-    runs-on: macos-14
+  c_sharp_macos:
     strategy:
       fail-fast: false
+    runs-on: macos-14
     steps:
-      - name: Install components
+      - name: Install Rust components
         run: |
-          brew install rust
-          brew install llvm
+          rustup component add rust-src
+      - name: Install other tools
+        run: |
           brew install gnu-sed
+          brew install libfaketime
+          brew install llvm@17
       - name: Checkout source code
         uses: actions/checkout@v2
         with:
@@ -85,16 +88,17 @@ jobs:
           git checkout 0.0.121
           cd lightning-c-bindings
           cargo update -p memchr --precise "2.5.0" --verbose
-      - name: Rebuild C bindings and check the sample app builds + links
+      - name: Build C bindings and check the sample app builds + links
         run: |
           export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
           export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
           cd ldk-c-bindings
-          CC=clang ./genbindings.sh ../rust-lightning true skip-tests
-      - name: Build Mac C# Bindings
+          ./genbindings.sh ../rust-lightning true skip-tests
+      - name: Build
         run: |
           export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
           export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
+          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - uses: actions/upload-artifact@v3
         with:
