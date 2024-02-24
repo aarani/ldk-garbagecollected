@@ -49,7 +49,7 @@ jobs:
         run: |
           # rust-src doesn't distribute the rustlib Cargo.lock, but an empty
           # file seems to suffice to make `-Zbuild-std` happy.
-          touch /usr/lib/rustlib/src/rust/Cargo.lock
+          # touch /usr/lib/rustlib/src/rust/Cargo.lock
           export LDK_C_BINDINGS_EXTRA_TARGETS=x86_64-pc-windows-gnu
           export LDK_C_BINDINGS_EXTRA_TARGET_CCS=`pwd`/deterministic-build-wrappers/clang-x86_64-windows
           MACOS_SDK="$PWD/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers" ./genbindings.sh ./rust-lightning true
