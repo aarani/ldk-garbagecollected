@@ -20,24 +20,13 @@ jobs:
           dpkg -i packages-microsoft-prod.deb
           apt-get update && apt-get install -y dotnet-sdk-8.0
           apt-get install -y git which
-          apt-get -y install lld git g++ clang llvm curl faketime
-      - name: Install rust
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh
-          chmod +x ./rustup.sh
-          ./rustup.sh -y
-          . $HOME/.cargo/env
-          rustup install 1.63.0
-          rustup default 1.63.0
-          rustup component add rust-src
-          rustup target install aarch64-apple-darwin
+          apt-get -y install cargo valgrind lld g++ clang rust-src
       - name: Checkout source code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
       - name: Install cbindgen
         run: |
-          . $HOME/.cargo/env
           git config --global safe.directory '*'
           git clone https://github.com/eqrion/cbindgen
           cd cbindgen/
@@ -58,7 +47,6 @@ jobs:
           cd ldk-c-bindings
           git checkout 0.0.121
           cd lightning-c-bindings
-          . $HOME/.cargo/env
           cargo update -p memchr --precise "2.5.0" --verbose
           touch src/version.rs
           RUSTFLAGS="--cfg=c_bindings" cargo check --features std
@@ -74,7 +62,6 @@ jobs:
           tar xvvf Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz
       - name: Rebuild bindings, and check the sample app builds + links
         run: |
-          . $HOME/.cargo/env
           # rust-src doesn't distribute the rustlib Cargo.lock, but an empty
           # file seems to suffice to make `-Zbuild-std` happy.
           # touch /usr/lib/rustlib/src/rust/Cargo.lock
@@ -84,12 +71,10 @@ jobs:
         run: rm c_sharp/src/org/ldk/enums/*.cs c_sharp/src/org/ldk/impl/*.cs c_sharp/src/org/ldk/structs/*.cs
       - name: Build Linux C# Bindings
         run: |
-          . $HOME/.cargo/env
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - name: Build MacOS C# Bindings
         run: |
-          . $HOME/.cargo/env
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           export CC="clang --target=aarch64-apple-darwin"
           export LDK_TARGET=aarch64-apple-darwin
