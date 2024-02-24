@@ -19,7 +19,7 @@ jobs:
           wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
           dpkg -i packages-microsoft-prod.deb
           apt-get update && apt-get install -y dotnet-sdk-8.0
-          apt-get install -y g++-mingw-w64 gcc-mingw-w64 git which
+          apt-get install -y git which
           apt-get -y install lld git g++ clang llvm curl faketime
       - name: Install rust
         run: |
@@ -31,7 +31,6 @@ jobs:
           rustup default 1.63.0
           rustup component add rust-src
           rustup target install aarch64-apple-darwin
-          rustup target install x86_64-pc-windows-gnu
       - name: Checkout source code
         uses: actions/checkout@v2
         with:
@@ -78,16 +77,9 @@ jobs:
           # file seems to suffice to make `-Zbuild-std` happy.
           # touch /usr/lib/rustlib/src/rust/Cargo.lock
           cd ldk-c-bindings
-          export LDK_C_BINDINGS_EXTRA_TARGETS=x86_64-pc-windows-gnu
-          export LDK_C_BINDINGS_EXTRA_TARGET_CCS=`pwd`/deterministic-build-wrappers/clang-x86_64-windows
           MACOS_SDK="$PWD/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers" ./genbindings.sh ../rust-lightning true
       - name: Remove checked-in source to ensure its correctly checked-in
         run: rm c_sharp/src/org/ldk/enums/*.cs c_sharp/src/org/ldk/impl/*.cs c_sharp/src/org/ldk/structs/*.cs
-      - name: Build Windows C# Bindings
-        run: |
-          . $HOME/.cargo/env
-          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
-          LDK_TARGET=x86_64-pc-windows-gnu ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - name: Build Linux C# Bindings
         run: |
           . $HOME/.cargo/env
