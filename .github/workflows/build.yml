@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Install required dependencies
         run: |
-          dnf install -y mingw64-gcc git cargo dotnet clang llvm lld faketime rust-std-static-x86_64-pc-windows-gnu which diffutils
+          dnf install -y mingw64-gcc git cargo dotnet clang llvm lld faketime rust-std-static-x86_64-pc-windows-gnu which diffutils wget
       - name: Checkout source code
         uses: actions/checkout@v2
         with:
@@ -35,12 +35,12 @@ jobs:
           git clone https://github.com/lightningdevkit/ldk-c-bindings
           cd ldk-c-bindings
           git checkout 0.0.121
-      - name: Rebuild C bindings with STD
-        run: |
-          cd ldk-c-bindings
-          export LDK_C_BINDINGS_EXTRA_TARGETS=x86_64-pc-windows-gnu
-          export LDK_C_BINDINGS_EXTRA_TARGET_CCS=`pwd`/deterministic-build-wrappers/clang-x86_64-windows
-          ./genbindings.sh ../rust-lightning true
+#      - name: Rebuild C bindings with STD
+#        run: |
+#          cd ldk-c-bindings
+#          export LDK_C_BINDINGS_EXTRA_TARGETS=x86_64-pc-windows-gnu
+#          export LDK_C_BINDINGS_EXTRA_TARGET_CCS=`pwd`/deterministic-build-wrappers/clang-x86_64-windows
+#          ./genbindings.sh ../rust-lightning true
       - name: Fetch MacOS SDK
         run: |
           wget https://bitcoincore.org/depends-sources/sdks/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz
@@ -50,6 +50,8 @@ jobs:
           # rust-src doesn't distribute the rustlib Cargo.lock, but an empty
           # file seems to suffice to make `-Zbuild-std` happy.
           touch /usr/lib/rustlib/src/rust/Cargo.lock
+          export LDK_C_BINDINGS_EXTRA_TARGETS=x86_64-pc-windows-gnu
+          export LDK_C_BINDINGS_EXTRA_TARGET_CCS=`pwd`/deterministic-build-wrappers/clang-x86_64-windows
           MACOS_SDK="$PWD/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers" ./genbindings.sh ./rust-lightning true
       - name: Remove checked-in source to ensure its correctly checked-in
         run: rm c_sharp/src/org/ldk/enums/*.cs c_sharp/src/org/ldk/impl/*.cs c_sharp/src/org/ldk/structs/*.cs
