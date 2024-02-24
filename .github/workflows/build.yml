@@ -58,6 +58,7 @@ jobs:
 #          ./genbindings.sh ../rust-lightning true
       - name: Fetch MacOS SDK
         run: |
+          cd ldk-c-bindings
           wget https://bitcoincore.org/depends-sources/sdks/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz
           tar xvvf Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers.tar.gz
       - name: Rebuild bindings, and check the sample app builds + links
