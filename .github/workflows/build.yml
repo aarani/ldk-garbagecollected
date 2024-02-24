@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Install required dependencies
         run: |
-          dnf install -y mingw64-gcc git cargo dotnet clang llvm lld faketime rust-std-static-x86_64-pc-windows-gnu which diffutils wget
+          dnf install -y mingw64-gcc git rust-1.63.0-1.fc35 dotnet clang-14.0.5-6.fc37 lld-14.0.5-1.fc36 llvm-14.0.5-2.eln120 faketime rust-std-static-x86_64-pc-windows-gnu which diffutils wget
       - name: Checkout source code
         uses: actions/checkout@v2
         with:
