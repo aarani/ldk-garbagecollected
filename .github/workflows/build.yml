@@ -669,6 +669,7 @@ jobs:
         run: |
           brew install gnu-sed
           brew install libfaketime
+          brew install llvm@17
       - name: Checkout source code
         uses: actions/checkout@v2
         with:
@@ -692,10 +693,12 @@ jobs:
       - name: Build C bindings and check the sample app builds + links
         run: |
           export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
+          export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
           cd ldk-c-bindings
-          CC=clang ./genbindings.sh ../rust-lightning true skip-tests
+          ./genbindings.sh ../rust-lightning true skip-tests
       - name: Build
         run: |
           export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
+          export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
-          CC=clang LDK_TARGET=aarch64-apple-darwin LDK_TARGET_CPU=apple-a14 ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
+          ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
