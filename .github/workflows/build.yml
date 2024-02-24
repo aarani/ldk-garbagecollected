@@ -43,7 +43,7 @@ jobs:
           cd rust-lightning
           git checkout origin/0.0.121-bindings
           cd ..
-          git clone https://github.com/lightningdevkit/ldk-c-bindings
+          git clone https://github.com/aarani/ldk-c-bindings
           cd ldk-c-bindings
           git checkout 0.0.121
           cd lightning-c-bindings
