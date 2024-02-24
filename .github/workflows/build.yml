@@ -53,7 +53,7 @@ jobs:
           cd ldk-c-bindings
           export LDK_C_BINDINGS_EXTRA_TARGETS=x86_64-pc-windows-gnu
           export LDK_C_BINDINGS_EXTRA_TARGET_CCS=`pwd`/deterministic-build-wrappers/clang-x86_64-windows
-          MACOS_SDK="$PWD/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers" ./genbindings.sh ./rust-lightning true
+          MACOS_SDK="$PWD/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers" ./genbindings.sh ../rust-lightning true
       - name: Remove checked-in source to ensure its correctly checked-in
         run: rm c_sharp/src/org/ldk/enums/*.cs c_sharp/src/org/ldk/impl/*.cs c_sharp/src/org/ldk/structs/*.cs
       - name: Build Windows C# Bindings
