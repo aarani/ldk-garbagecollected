@@ -8,17 +8,18 @@ jobs:
     # Ubuntu's version of clang doesn't support....anything that should work.
     # Ubuntu is an utter trash OS and should generally never be used for anything.
     # We also require dotnet so we use fedora
-    container: fedora:39
+    container: debian:bookworm
     strategy:
       fail-fast: false
     steps:
       - name: Install required dependencies
         run: |
-          dnf install -y mingw64-gcc git dotnet clang14 lld14 llvm14 faketime which diffutils wget
-      - name: Install rust
-        run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-          rustup default 1.63.0
+          wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+          sudo dpkg -i packages-microsoft-prod.deb
+          sudo apt-get update && \
+          sudo apt-get install -y dotnet-sdk-8.0
+          sudo apt-get install gcc-mingw-w64 git which wget
+          apt-get -y install cargo lld git g++ clang llvm curl rust-src faketime
       - name: Checkout source code
         uses: actions/checkout@v2
         with:
