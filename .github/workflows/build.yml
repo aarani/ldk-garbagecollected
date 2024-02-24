@@ -79,7 +79,6 @@ jobs:
           # file seems to suffice to make `-Zbuild-std` happy.
           # touch /usr/lib/rustlib/src/rust/Cargo.lock
           cd ldk-c-bindings
-          touch /usr/lib/rustlib/src/rust/Cargo.lock
           MACOS_SDK="$PWD/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers" ./genbindings.sh ../rust-lightning true
       - name: Remove checked-in source to ensure its correctly checked-in
         run: rm c_sharp/src/org/ldk/enums/*.cs c_sharp/src/org/ldk/impl/*.cs c_sharp/src/org/ldk/structs/*.cs
