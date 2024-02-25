@@ -161,7 +161,7 @@ if [ "$2" = "c_sharp" ]; then
 	LINK="-shared"
 	[ "$IS_WIN" = "false" ] && LINK="$LINK -ldl"
 	[ "$IS_MAC" = "false" ] && LINK="$LINK -Wl,--no-undefined"
-	[ "$IS_MAC" = "true" ] && COMPILE="$COMPILE -mmacosx-version-min=10.9"
+	[ "$IS_MAC" = "true" -a "$MACOS_SDK" != "" ] && COMPILE="$COMPILE -isysroot$MACOS_SDK -mmacosx-version-min=10.9"
 	[ "$IS_MAC" = "true" -a "$IS_APPLE_CLANG" = "false" ] && LINK="$LINK -fuse-ld=lld"
 	[ "$IS_MAC" = "true" -a "$IS_APPLE_CLANG" = "false" ] && echo "WARNING: Need at least upstream clang 13!"
 	[ "$IS_MAC" = "false" -a "$3" != "false" ] && LINK="$LINK -Wl,-wrap,calloc -Wl,-wrap,realloc -Wl,-wrap,malloc -Wl,-wrap,free"
