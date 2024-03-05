@@ -67,6 +67,7 @@ jobs:
       - name: Install Rust components
         run: |
           rustup component add rust-src
+          rustup target add aarch64-apple-darwin
       - name: Install other tools
         run: |
           brew install gnu-sed
