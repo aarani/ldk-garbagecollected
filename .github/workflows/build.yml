@@ -95,18 +95,16 @@ jobs:
           cargo update -p memchr --precise "2.5.0" --verbose
       - name: Build C bindings and check the sample app builds + links
         run: |
+          export HOMEBREW_PREFIX="$(brew --prefix)" 
           export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
           export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
-          export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
-          export PATH="/usr/local/opt/llvm/bin:$PATH"
           cd ldk-c-bindings
           ./genbindings.sh ../rust-lightning true skip-tests
       - name: Build
         run: |
+          export HOMEBREW_PREFIX="$(brew --prefix)" 
           export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
           export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
-          export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
-          export PATH="/usr/local/opt/llvm/bin:$PATH"
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - uses: actions/upload-artifact@v3
