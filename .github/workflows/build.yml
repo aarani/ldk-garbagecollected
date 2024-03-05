@@ -68,6 +68,9 @@ jobs:
         run: |
           rustup component add rust-src
           rustup target add aarch64-apple-darwin
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
       - name: Install other tools
         run: |
           brew install gnu-sed
