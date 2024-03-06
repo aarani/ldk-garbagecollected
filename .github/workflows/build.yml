@@ -78,7 +78,7 @@ jobs:
       - name: Build MacOS C# Bindings
         run: |
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
-          MACOS_SDK="$PWD/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers" LDK_TARGET=aarch64-apple-darwin LDK_TARGET_CPU=apple-a14 ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
+          MACOS_SDK="$PWD/ldk-c-bindings/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers" LDK_TARGET=aarch64-apple-darwin LDK_TARGET_CPU=apple-a14 ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - uses: actions/upload-artifact@v3
         with:
           name: libldkcsharp
