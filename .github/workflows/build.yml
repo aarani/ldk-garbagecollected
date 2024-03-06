@@ -43,19 +43,19 @@ jobs:
           cd rust-lightning
           git checkout origin/0.0.121-bindings
           cd ..
-          git clone https://github.com/lightningdevkit/ldk-c-bindings
+          git clone https://github.com/aarani/ldk-c-bindings
           cd ldk-c-bindings
           git checkout 0.0.121
           cd lightning-c-bindings
           cargo update -p memchr --precise "2.5.0" --verbose
           touch src/version.rs
           RUSTFLAGS="--cfg=c_bindings" cargo check --features std
-#      - name: Rebuild C bindings with STD
-#        run: |
-#          cd ldk-c-bindings
-#          export LDK_C_BINDINGS_EXTRA_TARGETS=x86_64-pc-windows-gnu
-#          export LDK_C_BINDINGS_EXTRA_TARGET_CCS=`pwd`/deterministic-build-wrappers/clang-x86_64-windows
-#          ./genbindings.sh ../rust-lightning true
+      - name: Rebuild C bindings with STD
+        run: |
+          cd ldk-c-bindings
+          export LDK_C_BINDINGS_EXTRA_TARGETS=x86_64-pc-windows-gnu
+          export LDK_C_BINDINGS_EXTRA_TARGET_CCS=`pwd`/deterministic-build-wrappers/clang-x86_64-windows
+          ./genbindings.sh ../rust-lightning true
       - name: Fetch MacOS SDK
         run: |
           cd ldk-c-bindings
@@ -71,6 +71,10 @@ jobs:
           MACOS_SDK="$PWD/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers" ./genbindings.sh ../rust-lightning true
       - name: Remove checked-in source to ensure its correctly checked-in
         run: rm c_sharp/src/org/ldk/enums/*.cs c_sharp/src/org/ldk/impl/*.cs c_sharp/src/org/ldk/structs/*.cs
+      - name: Build Windows C# Bindings
+        run: |
+          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
+          LDK_TARGET=x86_64-pc-windows-gnu ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - name: Build Linux C# Bindings
         run: |
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
@@ -83,55 +87,6 @@ jobs:
         run: |
           export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
           MACOS_SDK="$PWD/ldk-c-bindings/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers" LDK_TARGET=x86_64-apple-darwin ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
-      - uses: actions/upload-artifact@v3
-        with:
-          name: libldkcsharp
-          path: libldkcsharp_release*.so
-  c_sharp_macos:
-    strategy:
-      fail-fast: false
-    runs-on: macos-14
-    steps:
-      - name: Install Rust components
-        run: |
-          rustup component add rust-src
-      - name: Install other tools
-        run: |
-          brew install gnu-sed
-          brew install libfaketime
-          brew install llvm@17
-      - name: Checkout source code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Install cbindgen
-        run: cargo install cbindgen
-      - name: Checkout Rust-Lightning and LDK-C-Bindings git
-        run: |
-          git config --global user.email "ldk-ci@example.com"
-          git config --global user.name "LDK CI"
-          # Note this is a different endpoint, as we need one non-upstream commit!
-          git clone https://github.com/lightningdevkit/rust-lightning
-          cd rust-lightning
-          git checkout origin/0.0.121-bindings
-          cd ..
-          git clone https://github.com/lightningdevkit/ldk-c-bindings
-          cd ldk-c-bindings
-          git checkout 0.0.121.3
-          cd lightning-c-bindings
-          cargo update -p memchr --precise "2.5.0" --verbose
-      - name: Build C bindings and check the sample app builds + links
-        run: |
-          export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
-          export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
-          cd ldk-c-bindings
-          ./genbindings.sh ../rust-lightning true skip-tests
-      - name: Build
-        run: |
-          export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
-          export PATH="$HOMEBREW_PREFIX/opt/llvm/bin:$PATH"
-          export LDK_GARBAGECOLLECTED_GIT_OVERRIDE="$(git describe --tag HEAD)"
-          ./genbindings.sh ./ldk-c-bindings/ c_sharp false false
       - uses: actions/upload-artifact@v3
         with:
           name: libldkcsharp
