@@ -20,7 +20,7 @@ jobs:
           dpkg -i packages-microsoft-prod.deb
           apt-get update && apt-get install -y dotnet-sdk-8.0
           apt-get install -y git which
-          apt-get -y install cargo valgrind lld g++ llvm clang rust-src faketime
+          apt-get -y install cargo valgrind lld g++ llvm clang rust-src libstd-rust-dev-windows faketime
       - name: Checkout source code
         uses: actions/checkout@v2
         with:
